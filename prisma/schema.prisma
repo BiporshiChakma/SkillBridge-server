@@ -1,0 +1,196 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  STUDENT
+  TUTOR
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  BANNED
+}
+
+enum BookingStatus {
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+model User {
+  id           String     @id @default(uuid())
+  name         String
+  email        String     @unique
+  password     String?
+  role         UserRole   @default(STUDENT)
+  status       UserStatus @default(ACTIVE)
+  profileImage String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  tutorProfile TutorProfile?
+
+  studentBookings Booking[] @relation("StudentBookings")
+  tutorBookings   Booking[] @relation("TutorBookings")
+
+  studentReviews Review[] @relation("StudentReviews")
+  tutorReviews   Review[] @relation("TutorReviews")
+
+  availabilitySlots AvailabilitySlot[] @relation("TutorAvailability")
+  emailVerified     Boolean            @default(false)
+  image             String?
+  sessions          Session[]
+  accounts          Account[]
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tutorProfiles TutorProfile[]
+}
+
+model TutorProfile {
+  id         String @id @default(uuid())
+  userId     String @unique
+  categoryId String
+
+  bio           String?
+  qualification String?
+  experience    Int?
+  hourlyRate    Decimal?
+  averageRating Float    @default(0)
+  totalReviews  Int      @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id])
+
+  @@map("tutor_profiles")
+}
+
+model AvailabilitySlot {
+  id      String @id @default(uuid())
+  tutorId String
+
+  dayOfWeek Int
+  startTime String
+  endTime   String
+  isBooked  Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tutor User @relation("TutorAvailability", fields: [tutorId], references: [id], onDelete: Cascade)
+
+  bookings Booking[]
+
+  @@map("availability_slots")
+}
+
+model Booking {
+  id String @id @default(uuid())
+
+  studentId String
+  tutorId   String
+  slotId    String
+
+  sessionDate DateTime
+  status      BookingStatus @default(CONFIRMED)
+  notes       String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  student User             @relation("StudentBookings", fields: [studentId], references: [id], onDelete: Cascade)
+  tutor   User             @relation("TutorBookings", fields: [tutorId], references: [id], onDelete: Cascade)
+  slot    AvailabilitySlot @relation(fields: [slotId], references: [id])
+
+  review Review?
+
+  @@map("bookings")
+}
+
+model Review {
+  id String @id @default(uuid())
+
+  studentId String
+  tutorId   String
+  bookingId String @unique
+
+  rating  Int
+  comment String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  student User    @relation("StudentReviews", fields: [studentId], references: [id], onDelete: Cascade)
+  tutor   User    @relation("TutorReviews", fields: [tutorId], references: [id], onDelete: Cascade)
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@map("reviews")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
