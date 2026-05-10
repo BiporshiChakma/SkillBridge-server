@@ -21,6 +21,25 @@ const createBooking = async (req: Request, res: Response) => {
   }
 };
 
+ const getUserBookings = async (req:Request, res:Response) => {
+    const result = await BookingService.getUserBookings(req.user?.id as string);
+
+    res.json({
+      success: true,
+      data: result,
+    });
+  };
+
+  const getBookingById = async (req:Request, res:Response) => {
+    const result = await BookingService.getBookingById(req.params.id as string);
+
+    res.json({
+      success: true,
+      data: result,
+    });
+  };
+
+
 export const BookingController = {
-  createBooking,
+  createBooking,getUserBookings,getBookingById
 };

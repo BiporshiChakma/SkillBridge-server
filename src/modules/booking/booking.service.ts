@@ -37,6 +37,38 @@ const createBooking = async (
   
 };
 
+const getUserBookings = async (userId: string) => {
+  const result = await prisma.booking.findMany({
+    where: {
+      studentId: userId,
+    },
+    include: {
+      tutor: true,
+      slot: true,
+    },
+  });
+
+  return result;
+};
+const getBookingById = async (id: string) => {
+  const result = await prisma.booking.findUnique({
+    where: {
+      id,
+    },
+    include: {
+      tutor: true,
+      student: true,
+      slot: true,
+    },
+  });
+
+  if (!result) {
+    throw new Error("Booking not found");
+  }
+
+  return result;
+};
+
 export const BookingService = {
-  createBooking,
+  createBooking,getUserBookings,getBookingById
 };
