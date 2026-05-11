@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { BookingService } from "./booking.service";
+import { success } from "better-auth/*";
 
 const createBooking = async (req: Request, res: Response) => {
 
@@ -22,21 +23,38 @@ const createBooking = async (req: Request, res: Response) => {
 };
 
  const getUserBookings = async (req:Request, res:Response) => {
-    const result = await BookingService.getUserBookings(req.user?.id as string);
-
-    res.json({
+    try{
+      const result = await BookingService.getUserBookings(req.user?.id as string);
+    res.status(201).json({
       success: true,
-      data: result,
+      message: "Data Fetched successfully",
+     // data: result,
     });
+    }catch (error: any) {  
+    res.status(400).json({
+      success: false,
+      message: "Data Fetched failed",
+      error: error.message,
+    });
+  }
   };
 
   const getBookingById = async (req:Request, res:Response) => {
-    const result = await BookingService.getBookingById(req.params.id as string);
+  try{
+      const result = await BookingService.getBookingById(req.params.id as string);
 
-    res.json({
+     res.status(201).json({
       success: true,
-      data: result,
+      message: "Data Fetched successfully",
+     // data: result,
     });
+  }catch (error: any) {  
+    res.status(400).json({
+      success: false,
+      message: "Data Fetched failed",
+      error: error.message,
+    });
+  }
   };
 
 

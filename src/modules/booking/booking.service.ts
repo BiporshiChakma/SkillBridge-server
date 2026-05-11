@@ -42,9 +42,36 @@ const getUserBookings = async (userId: string) => {
     where: {
       studentId: userId,
     },
-    include: {
-      tutor: true,
-      slot: true,
+    select: {
+      id: true,
+      sessionDate: true,
+      status: true,
+
+      tutor: {
+        select: {
+          name: true,
+          email: true,
+          phone: true,
+        },
+      },
+
+      slot: {
+        select: {
+          dayOfWeek: true,
+          startTime: true,
+          endTime: true,
+          isBooked: true,
+        },
+      },
+
+      review: {
+        select: {
+          studentId: true,
+          rating: true,
+          comment: true,
+          createdAt: true,
+        },
+      },
     },
   });
 
@@ -55,16 +82,38 @@ const getBookingById = async (id: string) => {
     where: {
       id,
     },
-    include: {
-      tutor: true,
-      student: true,
-      slot: true,
+    select: {
+      id: true,
+      sessionDate: true,
+      status: true,
+
+      tutor: {
+        select: {
+          name: true,
+          email: true,
+          phone: true,
+        },
+      },
+
+      slot: {
+        select: {
+          dayOfWeek: true,
+          startTime: true,
+          endTime: true,
+          isBooked: true,
+        },
+      },
+
+      review: {
+        select: {
+          studentId: true,
+          rating: true,
+          comment: true,
+          createdAt: true,
+        },
+      },
     },
   });
-
-  if (!result) {
-    throw new Error("Booking not found");
-  }
 
   return result;
 };
