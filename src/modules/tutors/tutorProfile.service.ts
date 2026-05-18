@@ -1,45 +1,85 @@
 import {prisma} from "../../lib/prisma";
 
-const createTutorProfile = async (userId: string, payload: any) => {
-  
+const createTutorProfile = async (
+  userId: string,
+  payload: any
+) => {
+
+  // check existing profile
+  const existingTutor = await prisma.tutorProfile.findUnique({
+    where: {
+      userId,
+    },
+  });
+
+  if (existingTutor) {
+    throw new Error("Tutor profile already exists");
+  }
+
+  // check category
   const category = await prisma.category.findUnique({
-    where: { slug:payload.subject},
+    where: {
+      slug: payload.category,
+    },
   });
 
   if (!category) {
     throw new Error("Category not found");
   }
 
-  const existing = await prisma.tutorProfile.findUnique({
-    where: { userId },
-  });
-
-  if (existing) {
-    throw new Error("Tutor profile already exists");
-  }
-
-  return prisma.tutorProfile.create({
+  // create profile
+  const result = await prisma.tutorProfile.create({
     data: {
+      userId,
+      categoryId: category.id,
       bio: payload.bio,
       qualification: payload.qualification,
       experience: payload.experience,
       hourlyRate: payload.hourlyRate,
-
-      user: {
-        connect: { id: userId },
-      },
-
-      category: {
-        connect: { id: category?.id},
-      },
     },
   });
-};
 
-const getprofile = async (userId: string) => {
+  return result;
+};
+const getAllTutors = async (
+  searchTerm?: string,
+  category?: string
+) => {
+
   const result = await prisma.tutorProfile.findMany({
     where: {
-      userId,
+
+      ...(category && {
+        category: {
+          slug: category,
+        },
+      }),
+
+      ...(searchTerm && {
+        OR: [
+
+          // search by subject/category name
+          {
+            category: {
+              name: {
+                contains: searchTerm,
+                mode: "insensitive",
+              },
+            },
+          },
+
+          // search by tutor name
+          {
+            user: {
+              name: {
+                contains: searchTerm,
+                mode: "insensitive",
+              },
+            },
+          },
+
+        ],
+      }),
     },
 
     select: {
@@ -49,13 +89,11 @@ const getprofile = async (userId: string) => {
       experience: true,
       hourlyRate: true,
       averageRating: true,
-      totalReviews: true,
 
       user: {
         select: {
           name: true,
           email: true,
-          phone: true,
         },
       },
 
@@ -98,7 +136,7 @@ const updateTutorProfile = async (
 
 
 export const TutorService = {
-  createTutorProfile,getprofile,updateTutorProfile
+  createTutorProfile,getAllTutors,updateTutorProfile
 };
 
 
