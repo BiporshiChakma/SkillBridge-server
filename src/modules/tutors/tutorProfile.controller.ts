@@ -35,7 +35,25 @@ try{
     });
 }
 }
+const updateTutorProfile = async (req:Request, res:Response) => {
+  try {
+    const result = await TutorService.updateTutorProfile(
+      req.user?.id as string,
+      req.body
+    );
 
+    res.json({
+      success: true,
+      message: "Tutor profile updated successfully",
+      data: result,
+    });
+  } catch (error: any) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 export const TutorController = {
-  createTutorProfile,getprofile
+  createTutorProfile,getprofile,updateTutorProfile
 };

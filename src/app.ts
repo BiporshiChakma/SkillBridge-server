@@ -8,6 +8,7 @@ import { category } from "./modules/categories/category.router";
 import { AvailabilityController } from "./modules/abilityslot/abilityslot.controller";
 import { abilitySlot } from "./modules/abilityslot/abilityslot.route";
 import { review } from "./modules/review/review.router";
+import { adminRouter } from "./modules/admin/admin.router";
 const app:Application = express();
 
 app.use(express.json());
@@ -25,6 +26,7 @@ app.use("/tutors",tutorProfile);
 app.use("/category",category);
 app.use("/ability",abilitySlot);
 app.use("/review",review);
+app.use("/admin",adminRouter)
 app.get("/",(req,res)=>{
     res.send("Hello World");
 });

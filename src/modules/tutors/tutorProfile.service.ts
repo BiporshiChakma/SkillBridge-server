@@ -36,23 +36,69 @@ const createTutorProfile = async (userId: string, payload: any) => {
   });
 };
 
-const getprofile = async(userId:string)=>{
+const getprofile = async (userId: string) => {
   const result = await prisma.tutorProfile.findMany({
-  where:{
-    userId
-  },
-   include: {
-      user: true,
-      category:true
+    where: {
+      userId,
     },
-  })
-return result;
-}
+
+    select: {
+      id: true,
+      bio: true,
+      qualification: true,
+      experience: true,
+      hourlyRate: true,
+      averageRating: true,
+      totalReviews: true,
+
+      user: {
+        select: {
+          name: true,
+          email: true,
+          phone: true,
+        },
+      },
+
+      category: {
+        select: {
+          name: true,
+          slug: true,
+        },
+      },
+    },
+  });
+
+  return result;
+};
+
+const updateTutorProfile = async (
+  userId: string,
+  data: any
+) => {
+  const tutor = await prisma.tutorProfile.findFirst({
+    where: {
+      userId,
+    },
+  });
+
+  if (!tutor) {
+    throw new Error("Tutor profile not found");
+  }
+
+  const result = await prisma.tutorProfile.update({
+    where: {
+      id: tutor.id,
+    },
+    data,
+  });
+
+  return result;
+};
 
 
 
 export const TutorService = {
-  createTutorProfile,getprofile
+  createTutorProfile,getprofile,updateTutorProfile
 };
 
 

@@ -40,8 +40,39 @@ const getSlotsByTutor = async (tutorId: string) => {
     orderBy: { dayOfWeek: "asc" },
   });
 };
+const updateAvailability = async (
+  slotId: string,
+  userId: string,
+  data: any
+) => {
+
+  const slot = await prisma.availabilitySlot.findUnique({
+    where: {
+      id: slotId,
+    },
+  });
+
+  if (!slot) {
+    throw new Error("Slot not found");
+  }
+
+  // tutor can update only own slot
+  if (slot.tutorId !== userId) {
+    throw new Error("Unauthorized");
+  }
+
+  const result = await prisma.availabilitySlot.update({
+    where: {
+      id: slotId,
+    },
+    data,
+  });
+
+  return result;
+};
 
 export const AvailabilityService = {
   createSlot,
   getSlotsByTutor,
+  updateAvailability
 };
