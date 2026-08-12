@@ -6,7 +6,8 @@ import { CategoryController } from "./category.controller";
 
 const router = express.Router();
 
-router.post("/",CategoryController.createCategory)
+router.post("/",auth(),CategoryController.createCategory)
+router.get("/",CategoryController.getAllCategories)
 
 
 export const category:Router = router;

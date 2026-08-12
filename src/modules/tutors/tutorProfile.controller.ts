@@ -19,44 +19,23 @@ const createTutorProfile = async (req: Request, res: Response) => {
   }
 };
 
-const getAllTutors = async (req:Request, res:Response) => {
-
+const getMyTutorProfile = async (req: Request, res: Response) => {
   try {
-
-    const searchTerm = req.query.searchTerm as string;
-    const category = req.query.category as string;
-
-    const result = await TutorService.getAllTutors(
-      searchTerm,
-      category
+    const result = await TutorService.getMyTutorProfile(
+      req.user?.id as string
     );
-
-    // if no tutor found
-    if (result.length === 0) {
-
-      return res.status(404).json({
-        success: false,
-        message: `No ${searchTerm} tutor found`,
-        data: [],
-      });
-
-    }
-
-    res.status(200).json({
+   
+    res.json({
       success: true,
-      message: "Tutors fetched successfully",
+      message: "Tutor profile fetched successfully",
       data: result,
     });
-
   } catch (error: any) {
-
     res.status(400).json({
       success: false,
       message: error.message,
     });
-
   }
-
 };
 
 const updateTutorProfile = async (req:Request, res:Response) => {
@@ -79,5 +58,5 @@ const updateTutorProfile = async (req:Request, res:Response) => {
   }
 };
 export const TutorController = {
-  createTutorProfile,getAllTutors,updateTutorProfile
+  createTutorProfile,getMyTutorProfile,updateTutorProfile
 };

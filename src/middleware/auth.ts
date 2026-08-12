@@ -45,7 +45,7 @@ declare global{
                 email: session.user.email,
                 name: session.user.name,
                 role: session.user.role as string,
-                emailVerified: session.user.emailVerified
+               emailVerified: session.user.emailVerified
             }
 
             if (roles.length && !roles.includes(req.user.role as UserRole)) {
